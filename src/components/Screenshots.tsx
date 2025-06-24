@@ -33,19 +33,19 @@ const Screenshots = () => {
         </div>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {interfaces.map((interface, index) => (
+          {interfaces.map((item, index) => (
             <div key={index} className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all duration-300">
               <div className="mb-6">
                 <AspectRatio ratio={16/10}>
                   <img 
-                    src={`https://images.unsplash.com/${interface.placeholder}?auto=format&fit=crop&w=800&q=80`}
-                    alt={interface.title}
+                    src={`https://images.unsplash.com/${item.placeholder}?auto=format&fit=crop&w=800&q=80`}
+                    alt={item.title}
                     className="rounded-xl object-cover w-full h-full shadow-md"
                   />
                 </AspectRatio>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800 mb-4">{interface.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{interface.description}</p>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-4">{item.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{item.description}</p>
             </div>
           ))}
         </div>
