@@ -9,7 +9,223 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      drivers: {
+        Row: {
+          created_at: string | null
+          experience_years: number | null
+          id: string
+          is_available: boolean | null
+          license_number: string
+          rating: number | null
+          vehicle_number: string
+          vehicle_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          experience_years?: number | null
+          id: string
+          is_available?: boolean | null
+          license_number: string
+          rating?: number | null
+          vehicle_number: string
+          vehicle_type: string
+        }
+        Update: {
+          created_at?: string | null
+          experience_years?: number | null
+          id?: string
+          is_available?: boolean | null
+          license_number?: string
+          rating?: number | null
+          vehicle_number?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+          verification_status:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name: string
+          id: string
+          phone?: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+        }
+        Relationships: []
+      }
+      rides: {
+        Row: {
+          created_at: string | null
+          driver_id: string | null
+          dropoff_address: string
+          dropoff_time: string | null
+          id: string
+          pickup_address: string
+          pickup_time: string | null
+          scheduled_time: string
+          status: Database["public"]["Enums"]["ride_status"] | null
+          student_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          driver_id?: string | null
+          dropoff_address: string
+          dropoff_time?: string | null
+          id?: string
+          pickup_address: string
+          pickup_time?: string | null
+          scheduled_time: string
+          status?: Database["public"]["Enums"]["ride_status"] | null
+          student_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          driver_id?: string | null
+          dropoff_address?: string
+          dropoff_time?: string | null
+          id?: string
+          pickup_address?: string
+          pickup_time?: string | null
+          scheduled_time?: string
+          status?: Database["public"]["Enums"]["ride_status"] | null
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rides_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          address: string
+          admin_id: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          address: string
+          admin_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          address?: string
+          admin_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          created_at: string | null
+          emergency_contact: string | null
+          grade: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          pickup_address: string
+          school_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          emergency_contact?: string | null
+          grade?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          pickup_address: string
+          school_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          emergency_contact?: string | null
+          grade?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          pickup_address?: string
+          school_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +234,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      ride_status: "scheduled" | "in_progress" | "completed" | "cancelled"
+      user_role: "parent" | "driver" | "school_admin"
+      verification_status: "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +351,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      ride_status: ["scheduled", "in_progress", "completed", "cancelled"],
+      user_role: ["parent", "driver", "school_admin"],
+      verification_status: ["pending", "verified", "rejected"],
+    },
   },
 } as const
