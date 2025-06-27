@@ -39,29 +39,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           console.log('Profile data:', profileData, error);
           
-          // If profile doesn't exist or is incomplete, update it with metadata
-          if (!profileData || !profileData.full_name) {
+          // If profile doesn't exist, create it with metadata
+          if (error && error.code === 'PGRST116') {
             const metadata = session.user.user_metadata;
-            console.log('Updating profile with metadata:', metadata);
+            console.log('Creating profile with metadata:', metadata);
             
-            const { data: updatedProfile, error: updateError } = await supabase
+            const { data: newProfile, error: insertError } = await supabase
               .from('profiles')
-              .update({
+              .insert({
+                id: session.user.id,
+                email: session.user.email || '',
                 full_name: metadata.full_name || '',
                 phone: metadata.phone || null,
                 role: metadata.role || 'parent'
               })
-              .eq('id', session.user.id)
               .select()
               .single();
             
-            if (updateError) {
-              console.error('Error updating profile:', updateError);
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
             } else {
-              console.log('Profile updated:', updatedProfile);
-              setProfile(updatedProfile);
+              console.log('Profile created:', newProfile);
+              setProfile(newProfile);
             }
-          } else {
+          } else if (!error) {
             setProfile(profileData);
           }
         } else {
