@@ -25,18 +25,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
           // Fetch user profile
-          const { data: profileData } = await supabase
+          const { data: profileData, error } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
             .single();
           
-          setProfile(profileData);
+          console.log('Profile data:', profileData, error);
+          
+          // If profile doesn't exist or is incomplete, update it with metadata
+          if (!profileData || !profileData.full_name) {
+            const metadata = session.user.user_metadata;
+            console.log('Updating profile with metadata:', metadata);
+            
+            const { data: updatedProfile, error: updateError } = await supabase
+              .from('profiles')
+              .update({
+                full_name: metadata.full_name || '',
+                phone: metadata.phone || null,
+                role: metadata.role || 'parent'
+              })
+              .eq('id', session.user.id)
+              .select()
+              .single();
+            
+            if (updateError) {
+              console.error('Error updating profile:', updateError);
+            } else {
+              console.log('Profile updated:', updatedProfile);
+              setProfile(updatedProfile);
+            }
+          } else {
+            setProfile(profileData);
+          }
         } else {
           setProfile(null);
         }

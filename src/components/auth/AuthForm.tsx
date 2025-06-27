@@ -6,14 +6,17 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
+import { Mail } from "lucide-react";
 
 type UserRole = Database['public']['Enums']['user_role'];
 
 const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -43,9 +46,10 @@ const AuthForm = () => {
 
       if (error) throw error;
 
+      setEmailSent(true);
       toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account.",
+        title: "Check your email!",
+        description: "We've sent you a confirmation link. Please check your email and click the link to activate your account.",
       });
     } catch (error: any) {
       toast({
@@ -68,12 +72,22 @@ const AuthForm = () => {
         password: formData.password,
       });
 
-      if (error) throw error;
-
-      toast({
-        title: "Welcome back!",
-        description: "You have been signed in successfully.",
-      });
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email not confirmed",
+            description: "Please check your email and click the confirmation link before signing in.",
+            variant: "destructive"
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You have been signed in successfully.",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error signing in",
@@ -84,6 +98,90 @@ const AuthForm = () => {
       setIsLoading(false);
     }
   };
+
+  const handleResendConfirmation = async () => {
+    if (!formData.email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: formData.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Confirmation email sent",
+        description: "Please check your email for the new confirmation link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error sending email",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
+              <Mail className="h-6 w-6 text-blue-600" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
+            <CardDescription>We've sent you a confirmation link</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <Mail className="h-4 w-4" />
+              <AlertDescription>
+                We've sent a confirmation email to <strong>{formData.email}</strong>. 
+                Please check your email and click the confirmation link to activate your account.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600 text-center">
+                Didn't receive the email? Check your spam folder or
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={handleResendConfirmation}
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? "Sending..." : "Resend confirmation email"}
+              </Button>
+            </div>
+
+            <Button 
+              variant="ghost" 
+              onClick={() => setEmailSent(false)}
+              className="w-full"
+            >
+              Back to sign in
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex items-center justify-center p-6">
@@ -124,6 +222,18 @@ const AuthForm = () => {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Signing In..." : "Sign In"}
                 </Button>
+                
+                <div className="text-center">
+                  <Button 
+                    type="button"
+                    variant="link" 
+                    onClick={handleResendConfirmation}
+                    disabled={isLoading}
+                    className="text-sm"
+                  >
+                    Need to confirm your email?
+                  </Button>
+                </div>
               </form>
             </TabsContent>
             
