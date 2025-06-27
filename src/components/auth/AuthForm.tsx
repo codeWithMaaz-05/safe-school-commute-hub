@@ -26,54 +26,50 @@ const AuthForm = () => {
   const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      const { data: signUpData, error } = await supabase.auth.signUp({
+  try {
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    });
+
+    if (signUpError) throw signUpError;
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+
+    const { error: dbError } = await supabase
+      .from("profiles")
+      .insert({
+        id: userData.user.id, // Ensure your `profiles` table has `id` as UUID
         email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: formData.fullName,
-            phone: formData.phone,
-            role: formData.role
-          }
-        }
+        full_name: formData.fullName,
+        phone: formData.phone,
+        role: formData.role,
       });
 
-      if (error) throw error;
+    if (dbError) throw dbError;
 
-      // Insert into profiles table after sign up
-      const user = signUpData?.user;
-      if (user) {
-        const { error: profileError } = await supabase.from("profiles").insert({
-          id: user.id,
-          email: formData.email,
-          full_name: formData.fullName,
-          phone: formData.phone,
-          role: formData.role,
-        });
-
-        if (profileError) throw profileError;
-      }
-
-      setEmailSent(true);
-      toast({
-        title: "Check your email!",
-        description: "We've sent you a confirmation link. Please check your email and click the link to activate your account.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error creating account",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    setEmailSent(true);
+    toast({
+      title: "Check your email!",
+      description: "We've sent you a confirmation link. Please check your email and click the link to activate your account.",
+    });
+  } catch (error: any) {
+    toast({
+      title: "Error creating account",
+      description: error.message,
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
