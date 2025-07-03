@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { AuthProvider } from "@/contexts/AuthProvider";
+import { AuthProvider } from "./components/auth/AuthProvider";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <AuthProvider>

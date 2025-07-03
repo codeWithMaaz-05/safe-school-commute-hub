@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -148,9 +149,122 @@ const AuthForm = () => {
   // ... (The rest of your component JSX remains unchanged)
 
   return (
-    // Your JSX remains unchanged...
-    // Sign In and Sign Up forms as you had it
-  );
+  <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Welcome to Safe School Commute Hub</CardTitle>
+        <CardDescription>Please sign in or sign up to continue</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+
+          {/* SIGN IN FORM */}
+          <TabsContent value="signin">
+            <form onSubmit={handleSignIn} className="space-y-4">
+              <div>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label>Password</Label>
+                <Input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={isLoading} className="w-full">
+                {isLoading ? "Signing In..." : "Sign In"}
+              </Button>
+              <Button type="button" variant="outline" className="w-full" onClick={handleResendConfirmation}>
+                Resend Confirmation Email
+              </Button>
+            </form>
+          </TabsContent>
+
+          {/* SIGN UP FORM */}
+          <TabsContent value="signup">
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div>
+                <Label>Full Name</Label>
+                <Input
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label>Password</Label>
+                <Input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label>Role</Label>
+                <Select
+                  value={formData.role}
+                  onValueChange={(role) => setFormData({ ...formData, role: role as UserRole })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="parent">Parent</SelectItem>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" disabled={isLoading} className="w-full">
+                {isLoading ? "Creating Account..." : "Sign Up"}
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
+
+        {emailSent && (
+          <Alert className="mt-4">
+            <Mail className="h-4 w-4" />
+            <AlertDescription>
+              We've sent a confirmation link to your email. Please check your inbox.
+            </AlertDescription>
+          </Alert>
+        )}
+      </CardContent>
+    </Card>
+  </div>
+);
+
 };
 
 export default AuthForm;
